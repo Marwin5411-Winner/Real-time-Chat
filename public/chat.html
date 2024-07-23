@@ -1,74 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
-        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
-        crossorigin="anonymous"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="stylesheets/style.css" />
+    <script
+      src="http://cdn.socket.io/4.6.0/socket.io.min.js"
+      integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+      crossorigin="anonymous"
+    ></script>
     <title>CHAT ROOM</title>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div class="h-screen w-screen">
-        <h1 class="text-3xl text-center">Chat Room</h1>
-        <div class="container">
-            <ul id="messagebox">
-                <!-- Chat Message List-->
-                <li class="flex px-3 py-4 space-x-4">
-                    <p class="text-md text-green-500">Marvin</p>
-                    <span class="text-xl">Hello</span>
-                </li>
-            </ul>
-        </div>
+      <h1 class="text-3xl text-center">Chat Room</h1>
+      <div class="container">
+        <ul id="messagebox">
+          <!-- Chat Message List-->
+        </ul>
+      </div>
 
-        <form id="form" class="flex px-3 py-4 space-x-4">
-            <input id="input" type="text" name="message" placeholder="Enter your message" class="flex-1">
-            <button type="submit"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Send</button>
-        </form>
+      <form id="form" class="flex">
+        <input
+          id="input"
+          type="text"
+          name="message"
+          placeholder="Enter your message"
+          class="flex-1"
+        />
+        <button
+          style="margin-top: 5px"
+          type="submit"
+          class="button-submit rounded"
+        >
+          Send
+        </button>
+      </form>
     </div>
     <script>
-        const name = localStorage.getItem('name');
-        if (!name) {
-            location.href = '/';
+      const name = localStorage.getItem("name");
+      if (!name) {
+        location.href = "/";
+      }
+
+
+
+      const chats = getChatHistory()
+
+
+      async function getChatHistory() {
+
+      const response = await fetch("/api/chat", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const json = await response.json();
+
+      console.log(json);
+
+      for (let i = json.length - 1; i >= 0; i--) {
+      let item = document.createElement("li");
+        item.classList.add("flex", "px-3", "py-4", "space-x-4");
+        item.innerHTML = `
+                  <p class="text-md text-green-500 name">${json[i].name}</p>
+                  <span class="text-xl message">${json[i].message}</span>
+              `;
+        document.getElementById("messagebox").appendChild(item);
+      }
+
+      window.scrollTo(0, document.body.scrollHeight);
+
+    }
+
+      const socket = io();
+
+      socket.emit("userconnect", name)
+
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (input.value) {
+          let data = {
+            name: name,
+            message: input.value,
+          };
+
+          socket.emit("chat message", data);
+          input.value = "";
         }
+      });
 
-        const socket = io();
+      socket.on("userconnect", )
 
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (input.value) {
-                let data = {
-                    name: name,
-                    message: input.value
-                }
-
-                socket.emit('chat message', data);
-                input.value = '';
-            }
-        });
-
-        socket.on('chat message', (msg) => { 
-            let item = document.createElement('li');
-            item.classList.add('flex', 'px-3', 'py-4', 'space-x-4');
-            item.innerHTML = `
-                <p class="text-md text-green-500">${msg.name}</p>
-                <span class="text-xl">${msg.message}</span>
-            `;
-            document.getElementById('messagebox').appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
-        });
-
-
+      socket.on("chat message", (msg) => {
+        let item = document.createElement("li");
+        item.classList.add("flex", "px-3", "py-4", "space-x-4");
+        item.innerHTML = `
+                  <p class="text-md text-green-500 name">${msg.name}</p>
+                  <span class="text-xl message">${msg.message}</span>
+              `;
+        document.getElementById("messagebox").appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
     </script>
-
-</body>
-
+  </body>
 </html>

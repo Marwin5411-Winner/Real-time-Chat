@@ -4,5 +4,40 @@ body {
 }
 
 a {
-  color: #00B7FF;
+  color: #00b7ff;
+}
+
+ul li {
+  list-style: none !important;
+}
+
+.name {
+  color: green;
+}
+
+#input {
+  width: 100%;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.button-submit {
+  background-color: blue;
+  color: white;
+  padding: 10px;
+  font-size: large;
+  border: 0;
+  border-radius: 5px;
+}
+
+.flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.message {
+  display: block;
+  margin-block-start: 2em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
 }
